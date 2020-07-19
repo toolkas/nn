@@ -47,10 +47,16 @@ public class Network {
         return layer.result();
     }
 
-    public void trainStep(double[][] inSet, double[][] outSet, double e) {
+    public void train(double[][] inputs, double[][] targets, double e, int iterations) {
+        for (int index = 0; index < iterations; index++) {
+            trainStep(inputs, targets, e);
+        }
+    }
+
+    public void trainStep(double[][] inSet, double[][] targets, double e) {
         for (int i = 0; i < inSet.length; i++) {
             double[] in = inSet[i];
-            double[] out = outSet[i];
+            double[] out = targets[i];
 
             doCorrect(in, out, e);
         }

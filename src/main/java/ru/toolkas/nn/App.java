@@ -19,8 +19,6 @@ public class App {
         network.add(layer1);
         network.add(layer2);
 
-        Random random = new Random();
-        network.init(random);
 
         double[][] inputs = new double[][]{
                 {0, 0},
@@ -33,22 +31,21 @@ public class App {
                 {0},
                 {1},
                 {1},
-                {2},
+                {1},
         };
 
-        Function<Double, Double> format = Functions.linear();
-
         System.out.println("Init");
-        System.out.println(format.apply(network.input(new double[]{0, 0})[0]));
-        System.out.println(format.apply(network.input(new double[]{0, 1})[0]));
-        System.out.println(format.apply(network.input(new double[]{1, 0})[0]));
-        System.out.println(format.apply(network.input(new double[]{1, 1})[0]));
+        network.init(new Random());
 
         System.out.println("Train");
-        for (int index = 0; index < 5000; index++) {
-            network.trainStep(inputs, targets, 0.2);
-        }
+        network.train(inputs, targets, 0.5, 500);
 
+        Function<Double, Long> format = new Function<Double, Long>() {
+            @Override
+            public Long apply(Double aDouble) {
+                return Math.round(aDouble);
+            }
+        };
         System.out.println(format.apply(network.input(new double[]{0, 0})[0]));
         System.out.println(format.apply(network.input(new double[]{0, 1})[0]));
         System.out.println(format.apply(network.input(new double[]{1, 0})[0]));
