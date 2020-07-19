@@ -1,8 +1,6 @@
 package ru.toolkas.nn;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class Network {
     private final List<Layer> layers = new ArrayList<>();
@@ -54,11 +52,11 @@ public class Network {
             double[] in = inSet[i];
             double[] out = outSet[i];
 
-            doTrain(in, out, e);
+            doCorrect(in, out, e);
         }
     }
 
-    private void doTrain(double[] in, double[] out, double e) {
+    private void doCorrect(double[] in, double[] out, double e) {
         // Вычисляем предсказание
         input(in);
 
@@ -67,49 +65,57 @@ public class Network {
             Layer layer = layers.get(lIndex);
             List<Neuron> neurons = layer.getNeurons();
 
-            // Если текущий слой - выходной
-            if (lIndex == layers.size() - 1) {
-                // Если предыдущий слой - скрытый
+            for (int nIndex = 0; nIndex < neurons.size(); nIndex++) {
+                Neuron neuron = neurons.get(nIndex);
+                setNeuronError(neuron, lIndex, nIndex, out);
+
+                double bias = neuron.getBias();
+
+                double db = -e * neuron.getError();
+                neuron.setBias(bias + db);
+
+                double[] weights = neuron.getWeights();
                 if (lIndex - 1 >= 0) {
                     Layer prev = layers.get(lIndex - 1);
 
-                    for (int nIndex = 0; nIndex < neurons.size(); nIndex++) {
-                        Neuron neuron = neurons.get(nIndex);
-                        double[] weights = neuron.getWeights();
-                        for (int wIndex = 0; wIndex < weights.length; wIndex++) {
-                            double dw = -2 * e * prev.getNeurons().get(wIndex).getValue() * neuron.getValue() * (1 - neuron.getValue()) * (neuron.getValue() - out[nIndex]);
-                            weights[wIndex] = weights[wIndex] + dw;
-                        }
-
-                        double bias = neuron.getBias();
-                        double db = -2 * e * neuron.getValue() * (1 - neuron.getValue()) * (neuron.getValue() - out[nIndex]);
-                        neuron.setBias(bias + db);
+                    double[] newWeights = new double[weights.length];
+                    for (int wIndex = 0; wIndex < weights.length; wIndex++) {
+                        double weight = weights[wIndex];
+                        double value = prev.getNeurons().get(wIndex).getValue();
+                        double dw = -e * value * neuron.getError();
+                        newWeights[wIndex] = weight + dw;
                     }
+                    neuron.setWeights(newWeights);
                 } else {
-                    // Если текущий слой - первый
-                    for (int nIndex = 0; nIndex < neurons.size(); nIndex++) {
-                        Neuron neuron = neurons.get(nIndex);
-                        double[] weights = neuron.getWeights();
-
-                        for (int wIndex = 0; wIndex < weights.length; wIndex++) {
-                            double dw = -2 * e * in[wIndex] * neuron.getValue() * (1 - neuron.getValue()) * (neuron.getValue() - out[nIndex]);
-                            weights[wIndex] = weights[wIndex] + dw;
-                        }
-
-                        double bias = neuron.getBias();
-                        double db = -2 * e * neuron.getValue() * (1 - neuron.getValue()) * (neuron.getValue() - out[nIndex]);
-                        neuron.setBias(bias + db);
+                    double[] newWeights = new double[weights.length];
+                    for (int wIndex = 0; wIndex < weights.length; wIndex++) {
+                        double weight = weights[wIndex];
+                        double value = in[wIndex];
+                        double dw = -e * value * neuron.getError();
+                        newWeights[wIndex] = weight + dw;
                     }
-                }
-            } else {
-                //Если текущий слой - скрытый
-                if (lIndex - 1 >= 0) {
-
-                } else {
-                    // Если текущий слой - первый
-
+                    neuron.setWeights(newWeights);
                 }
             }
         }
+    }
+
+    private void setNeuronError(Neuron neuron, int lIndex, int nIndex, double[] out) {
+        double error = 0;
+        if (lIndex == layers.size() - 1) {
+            error = neuron.getValue() * (1 - neuron.getValue()) * (neuron.getValue() - out[nIndex]);
+        } else {
+            Layer next = layers.get(lIndex + 1);
+            List<Neuron> nextNeurons = next.getNeurons();
+
+            double s = 0;
+            for (Neuron nexNeuron : nextNeurons) {
+                double weight = nexNeuron.getWeights()[nIndex];
+                s += weight * nexNeuron.getError();
+            }
+
+            error = neuron.getValue() * (1 - neuron.getValue()) * s;
+        }
+        neuron.setError(error);
     }
 }

@@ -2,8 +2,8 @@ package ru.toolkas.nn;
 
 import ru.toolkas.nn.util.Functions;
 
-import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Function;
 
 public class App {
     public static void main(String[] args) {
@@ -31,14 +31,27 @@ public class App {
 
         double[][] targets = new double[][]{
                 {0},
-                {0},
-                {0},
                 {1},
+                {1},
+                {2},
         };
-        network.trainStep(inputs, targets, 0.1);
 
-        network.input(new double[]{1, 2});
-        double[] result = network.result();
-        System.out.println(Arrays.toString(result));
+        Function<Double, Double> format = Functions.linear();
+
+        System.out.println("Init");
+        System.out.println(format.apply(network.input(new double[]{0, 0})[0]));
+        System.out.println(format.apply(network.input(new double[]{0, 1})[0]));
+        System.out.println(format.apply(network.input(new double[]{1, 0})[0]));
+        System.out.println(format.apply(network.input(new double[]{1, 1})[0]));
+
+        System.out.println("Train");
+        for (int index = 0; index < 5000; index++) {
+            network.trainStep(inputs, targets, 0.2);
+        }
+
+        System.out.println(format.apply(network.input(new double[]{0, 0})[0]));
+        System.out.println(format.apply(network.input(new double[]{0, 1})[0]));
+        System.out.println(format.apply(network.input(new double[]{1, 0})[0]));
+        System.out.println(format.apply(network.input(new double[]{1, 1})[0]));
     }
 }

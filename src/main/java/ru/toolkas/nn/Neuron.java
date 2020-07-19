@@ -10,6 +10,7 @@ public class Neuron {
 
     private double[] input;
     private double value;
+    private double error;
 
     public Neuron(Function<Double, Double> activation) {
         this.activation = activation;
@@ -29,6 +30,14 @@ public class Neuron {
 
     public void setBias(double bias) {
         this.bias = bias;
+    }
+
+    public double getError() {
+        return error;
+    }
+
+    public void setError(double error) {
+        this.error = error;
     }
 
     public void input(double[] input) {
