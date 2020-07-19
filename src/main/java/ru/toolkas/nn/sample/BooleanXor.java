@@ -8,6 +8,9 @@ import ru.toolkas.nn.util.Functions;
 import java.util.Random;
 import java.util.function.Function;
 
+/**
+ * x xor y
+ */
 public class BooleanXor {
     public static void main(String[] args) {
         Network network = new Network(2);

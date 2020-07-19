@@ -8,6 +8,9 @@ import ru.toolkas.nn.util.Functions;
 import java.util.Random;
 import java.util.function.Function;
 
+/**
+ * x or y
+ */
 public class BooleanOr {
     public static void main(String[] args) {
         Network network = new Network(2);
